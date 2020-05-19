@@ -24,32 +24,36 @@ FROM base as pkgs
 
 WORKDIR /src
 
-#RUN printf "\
-#        package main\n\n\
-#        import (\n\
-#            _ \"github.com/golang/protobuf/proto\"\n\
-#            _ \"github.com/grpc-ecosystem/go-grpc-middleware\"\n\
-#            _ \"google.golang.org/grpc\"\n\
-#        )\n\n\
-#        func main() {}\n" > ./stub.go
-#RUN go build
-
 COPY ./go.mod ./go.sum ./
 
 RUN go mod download -x
 
 ################################################################
-#### final container
-FROM base
+#### intermediate container
+FROM base as prepared
 
 COPY --from=pkgs $GOPATH/ $GOPATH/
 
 WORKDIR /src
 COPY . .
 
+################################################################
+#### main container
+FROM prepared as main
+
+WORKDIR /src
+
 RUN go generate
 RUN go build -o /grpc-example
 
 WORKDIR /
 
-ENV DOCKER true
+################################################################
+#### test server container
+FROM prepared as test_server
+
+WORKDIR /src/test-server
+
+RUN go build -o /test-server
+
+WORKDIR /

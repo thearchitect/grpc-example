@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"errors"
-	"google.golang.org/grpc"
 	"io"
 	"log"
 	"os"
 	"path/filepath"
+
+	"google.golang.org/grpc"
 )
 
 func Download(ctx context.Context, target, uri, path string) error {

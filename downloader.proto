@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package downloader;
+
+option go_package = ".;main";
+
+service DownloaderService {
+    rpc DownloadFile (DownloadFileReq) returns (stream DownloadFileResp) {
+    }
+}
+
+message DownloadFileReq {
+    string URL = 1;
+}
+
+message DownloadFileResp {
+    oneof Msg {
+        DownloadFileHeader Header = 1;
+        DownloadFileChunk Chunk = 2;
+    }
+}
+
+message DownloadFileHeader {
+    int64 Size = 1;
+    string Name = 2;
+}
+
+message DownloadFileChunk {
+    bytes Chunk = 1;
+}

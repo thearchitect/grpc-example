@@ -1,0 +1,20 @@
+version: '3.4'
+
+services:
+  protoc:
+    command: protoc -I . --go_out=plugins=grpc:./ downloader.proto
+    working_dir: /src
+    build:
+      context: "."
+      target: base
+      dockerfile: Dockerfile
+    volumes:
+      - src:/src
+
+volumes:
+  src:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: $PWD

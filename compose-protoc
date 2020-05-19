@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -e -x
+
+COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 \
+    docker-compose --file docker-compose-protoc.yml up \
+        --build --force-recreate --remove-orphans --abort-on-container-exit

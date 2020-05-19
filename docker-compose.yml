@@ -1,0 +1,30 @@
+version: '3.4'
+
+services:
+  server:
+    command: /grpc-example
+    build:
+      context: "."
+      dockerfile: Dockerfile
+    ports:
+      - "7532:7532"
+
+  client:
+    command: /grpc-example http://server/
+    build:
+      context: "."
+      dockerfile: Dockerfile
+    volumes:
+      - tmp:/tmp
+    depends_on:
+      - server
+    links:
+      - server
+
+volumes:
+  tmp:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: $PWD/tmp

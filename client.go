@@ -16,7 +16,7 @@ func Download(ctx context.Context, target, uri, path string) error {
 		return err
 	}
 
-	name, rc, err := client.Download(ctx, uri)
+	name, rc, err := client.DownloadReadCloser(ctx, uri)
 	if err != nil {
 		return err
 	}
@@ -55,7 +55,28 @@ func NewClient(target string) (*Client, error) {
 	return c, nil
 }
 
-func (c *Client) Download(ctx context.Context, uri string) (name string, rc io.ReadCloser, err error) {
+func (c *Client) DownloadReadCloser(ctx context.Context, uri string) (name string, rc io.ReadCloser, err error) {
+	name, wfn, err := c.Download(ctx, uri)
+	if err != nil {
+		return "", nil, err
+	}
+
+	r, w, err := os.Pipe()
+	if err != nil {
+		return "", nil, err
+	}
+
+	go func() {
+		defer w.Close()
+		if err := wfn(w); err != nil {
+			panic(err)
+		}
+	}()
+
+	return name, r, nil
+}
+
+func (c *Client) Download(ctx context.Context, uri string) (name string, wfn func(w io.Writer) error, err error) {
 	ctx, cancel := context.WithCancel(ctx)
 
 	defer func() {
@@ -81,86 +102,30 @@ func (c *Client) Download(ctx context.Context, uri string) (name string, rc io.R
 		}
 	}
 
-	proxy := newReadCloser(ctx, func() error {
-		cancel()
-		return nil
-	})
-
-	go func() {
+	return name, func(w io.Writer) error {
 		defer cancel()
 
 		for {
-			if chunk, err := client.Recv(); err != nil {
+			if chunkMsg, err := client.Recv(); err != nil {
 				if err == io.EOF {
 					log.Println("done")
-					go proxy.Feed(nil)
+					break
 				} else {
 					log.Println("error receiving chunk:", err)
+					return err
 				}
-				return
 			} else {
-				switch chunk := chunk.Msg.(type) {
+				switch chunk := chunkMsg.Msg.(type) {
 				case *DownloadFileResp_Chunk:
 					log.Println("chunk received:", len(chunk.Chunk.Chunk))
-					go proxy.Feed(chunk.Chunk.Chunk)
+					if _, err := w.Write(chunk.Chunk.Chunk); err != nil {
+						return err
+					}
 				default:
-					panic(errors.New("bad message type from server"))
+					return errors.New("bad message type from server")
 				}
 			}
 		}
-	}()
-
-	return name, proxy, nil
-}
-
-var _ io.ReadCloser = new(readCloser)
-
-type readCloser struct {
-	ctx    context.Context
-	reader chan []byte
-	close  func() error
-
-	buf []byte
-}
-
-func newReadCloser(ctx context.Context, close func() error) *readCloser {
-	rc := &readCloser{
-		ctx:    ctx,
-		close:  close,
-		reader: make(chan []byte),
-	}
-
-	return rc
-}
-
-func (r *readCloser) Feed(p []byte) {
-	r.reader <- p
-}
-
-func (r *readCloser) Read(p []byte) (n int, err error) {
-	flush := func() (n int, err error) {
-		n = copy(p, r.buf)
-		r.buf = r.buf[n:]
-		return n, nil
-	}
-	if len(r.buf) > 0 {
-		return flush()
-	}
-
-	select {
-	case data, ok := <-r.reader:
-		if ok && len(data) > 0 {
-			r.buf = data
-			return flush()
-		} else {
-			log.Println("done: eof")
-			return 0, io.EOF
-		}
-	case <-r.ctx.Done():
-		return 0, r.ctx.Err()
-	}
-}
-
-func (r *readCloser) Close() error {
-	return r.close()
+		return nil
+	}, nil
 }

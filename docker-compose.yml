@@ -10,7 +10,7 @@ services:
       - "7532:7532"
 
   client:
-    command: /grpc-example http://server/
+    command: /grpc-example server:7532 http://dl-cdn.alpinelinux.org/alpine/v3.11/releases/aarch64/alpine-minirootfs-3.11.6-aarch64.tar.gz
     build:
       context: "."
       dockerfile: Dockerfile

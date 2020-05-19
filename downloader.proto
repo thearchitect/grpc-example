@@ -23,6 +23,7 @@ message DownloadFileResp {
 message DownloadFileHeader {
     int64 Size = 1;
     string Name = 2;
+    string ContentType = 3;
 }
 
 message DownloadFileChunk {

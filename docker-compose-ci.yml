@@ -1,0 +1,24 @@
+version: '3.4'
+
+services:
+  test_server:
+    command: /test-server
+    build:
+      context: "."
+      dockerfile: Dockerfile
+      target: test_server
+    ports:
+      - "8080:8080"
+
+  test_runner:
+    command: go test -v -benchmem -bench=. .
+    working_dir: /src
+    build:
+      context: "."
+      dockerfile: Dockerfile
+      target: main
+    depends_on:
+      - test_server
+    links:
+      - test_server
+

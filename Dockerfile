@@ -15,8 +15,8 @@ RUN cd /protobuf &&\
     cd .. &&\
     rm -r protobuf
 
-RUN go get google.golang.org/grpc
-RUN go get github.com/golang/protobuf/protoc-gen-go
+RUN go get -x google.golang.org/grpc
+RUN go get -x github.com/golang/protobuf/protoc-gen-go
 
 ################################################################
 #### pkgs container (to speed up rebuild after context change; 2x in this case)
@@ -37,13 +37,14 @@ COPY --from=pkgs $GOPATH/ $GOPATH/
 WORKDIR /src
 COPY . .
 
+RUN go generate
+
 ################################################################
 #### main container
 FROM prepared as main
 
 WORKDIR /src
 
-RUN go generate
 RUN go build -o /grpc-example
 
 WORKDIR /

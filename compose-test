@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 set -e -x
 
+time docker build \
+  -f Dockerfile-Base --target prepared \
+  -t docker.pkg.github.com/thearchitect/grpc-example/actions:latest .
+
 # COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 \
-time docker-compose -f docker-compose-test.yml up --build --force-recreate --remove-orphans --abort-on-container-exit
+time docker-compose -f docker-compose-test.yml \
+  up --build --force-recreate --remove-orphans --abort-on-container-exit

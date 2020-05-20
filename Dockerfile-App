@@ -1,0 +1,28 @@
+################################################################
+#### intermediate container
+FROM docker.pkg.github.com/thearchitect/grpc-example/actions:latest as src
+
+WORKDIR /src
+COPY . .
+
+RUN go generate
+
+################################################################
+#### main container
+FROM src as main
+
+WORKDIR /src
+
+RUN go build -o /grpc-example
+
+WORKDIR /
+
+################################################################
+#### test server container
+FROM src as test_server
+
+WORKDIR /src/test-server
+
+RUN go build -o /test-server
+
+WORKDIR /

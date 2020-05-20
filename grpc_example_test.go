@@ -9,9 +9,9 @@ import (
 	"testing"
 )
 
-func TestMain(m *testing.M) {
-	m.Run()
-}
+//func TestMain(m *testing.M) {
+//	m.Run()
+//}
 
 func TestDownload(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
@@ -49,7 +49,7 @@ func TestDownload(t *testing.T) {
 	} else {
 		defer resp.Body.Close()
 
-		if resp.StatusCode != http.StatusOK {
+		if resp.StatusCode == http.StatusOK {
 			t.Fatalf("bad response: %d", resp.StatusCode)
 		}
 	}

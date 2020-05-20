@@ -7,7 +7,7 @@ services:
     build:
       context: "."
       target: base
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-Base
     volumes:
       - src:/src
 

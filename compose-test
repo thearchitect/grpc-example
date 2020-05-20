@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -e -x
+
+# COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 \
+time docker-compose -f docker-compose-test.yml up --build --force-recreate --remove-orphans --abort-on-container-exit

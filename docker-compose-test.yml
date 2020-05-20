@@ -1,0 +1,35 @@
+version: '3.4'
+
+services:
+  base:
+    command: tail -f /dev/null
+    image: docker.pkg.github.com/thearchitect/grpc-example/actions:latest
+    build:
+      context: "."
+      dockerfile: Dockerfile-Base
+      target: prepared
+
+  test_server:
+    command: /test-server
+    working_dir: /
+    build:
+      context: "."
+      dockerfile: Dockerfile-App
+      target: test_server
+    depends_on:
+      - base
+    ports:
+      - "8080:8080"
+
+  test_runner:
+    command: go test -v .
+    working_dir: /src
+    build:
+      context: "."
+      dockerfile: Dockerfile-App
+      target: test_server
+    depends_on:
+      - base
+      - test_server
+    links:
+      - test_server

@@ -34,27 +34,3 @@ FROM base as prepared
 
 COPY --from=pkgs $GOPATH/ $GOPATH/
 
-WORKDIR /src
-COPY . .
-
-RUN go generate
-
-################################################################
-#### main container
-FROM prepared as main
-
-WORKDIR /src
-
-RUN go build -o /grpc-example
-
-WORKDIR /
-
-################################################################
-#### test server container
-FROM prepared as test_server
-
-WORKDIR /src/test-server
-
-RUN go build -o /test-server
-
-WORKDIR /

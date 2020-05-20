@@ -2,7 +2,6 @@
 set -e -x
 
 docker build --target test_server -t docker.pkg.github.com/thearchitect/grpc-example/actions:latest .
-#docker tag IMAGE_ID docker.pkg.github.com/thearchitect/grpc-example/actions:latest
 docker push docker.pkg.github.com/thearchitect/grpc-example/actions:latest
 
 # TODO --squash

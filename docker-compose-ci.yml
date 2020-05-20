@@ -16,4 +16,3 @@ services:
       - test_server
     links:
       - test_server
-

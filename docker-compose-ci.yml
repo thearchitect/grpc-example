@@ -4,14 +4,14 @@ services:
   test_server:
     command: /test-server
     working_dir: /
-    build: docker.pkg.github.com/thearchitect/grpc-example/actions:latest
+    image: docker.pkg.github.com/thearchitect/grpc-example/actions:latest
     ports:
       - "8080:8080"
 
   test_runner:
     command: go test -v -benchmem -bench=. .
     working_dir: /src
-    build: docker.pkg.github.com/thearchitect/grpc-example/actions:latest
+    image: docker.pkg.github.com/thearchitect/grpc-example/actions:latest
     depends_on:
       - test_server
     links:

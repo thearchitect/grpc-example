@@ -41,6 +41,8 @@ func TestDownload(t *testing.T) {
 
 	h := fmt.Sprintf("%x", sha256.Sum256(buf.Bytes()))
 
+	t.Logf("downloaded blob hash: %s", h)
+
 	if resp, err := http.Get(fmt.Sprintf("http://test_server:8080/chkhash/%s", h)); err != nil {
 		t.Error(err)
 		t.FailNow()

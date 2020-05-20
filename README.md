@@ -1,3 +1,5 @@
+![CI](https://github.com/thearchitect/grpc-example/workflows/CI/badge.svg)
+
 ## Requirements
 * install latest `docker`
 * install latest `docker-compose`
